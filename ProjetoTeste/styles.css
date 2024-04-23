@@ -1,0 +1,5 @@
+/* Estilos para o contêiner do gráfico */
+#chart-container {
+    width: 500px; /* Defina a largura desejada aqui */
+    height: 500px;
+}

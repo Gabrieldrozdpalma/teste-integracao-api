@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrando API</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        // Função para carregar os dados da API
+        function fetchData() {
+            fetch('https://api.fflch.usp.br/public/ics?ano_inicio[(gte)=2019]&ano_fim[(lte)=2023]',{
+                mode:'no-cors'
+            })
+                .then(response => response.json())
+                .then(data => {
+                   // Processa os dados da API para contar a quantidade de projetos por ano
+                   const projectsByYear = {};
+                    data.forEach(project => {
+                        const year = project.ano_inicio;
+                        projectsByYear[year] = (projectsByYear[year] || 0) + 1;
+                    });
+
+                    // Converte os dados para o formato esperado pelo gráfico
+                    const years = Object.keys(projectsByYear);
+                    const projectCounts = years.map(year => projectsByYear[year]);
+
+                    // Atualiza os dados do gráfico com os dados da API
+                    myChart.data.labels = years;
+                    myChart.data.datasets[0].data = projectCounts;
+                    myChart.update();
+                })
+                .catch(error => {
+                    console.error('Erro ao obter os dados da API:', error);
+                });
+        }
+
+      // Configurações do gráfico
+      var chartOptions = {
+            responsive: true, // Para tornar o gráfico responsivo
+            maintainAspectRatio: false, // Para não manter a proporção de aspecto
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        stepSize: 1 // Incremento entre os valores do eixo Y (opcional)
+                    },
+                    suggestedMin: 0, // Valor mínimo sugerido para o eixo Y
+                    suggestedMax: undefined // Valor máximo sugerido para o eixo Y
+                }]
+            }
+        };
+
+        // Dados iniciais do gráfico
+        var initialData = {
+            labels: [],
+            datasets: [{
+                label: "Iniciações Científicas por Ano",
+                backgroundColor: "rgba(54, 162, 235, 0.2)",
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 1,
+                data: [],
+            }]
+        };
+
+        // Criação do gráfico
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: initialData,
+            options: chartOptions
+        });
+
+        // Chama a função fetchData para obter os dados da API
+        fetchData();
+    </script>
+</body>
+</html>
